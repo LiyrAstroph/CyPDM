@@ -105,33 +105,30 @@ void pdmEnd()
 
 double getTheta(double *phase, double *y, int n, double *bbeg, double *bend, int nb)
 {
-  int i, j, N, M, ic;
+  int i, j, ic;
   double mean, sigmaSqr, sSqrUp, sSqrDown, sigmaj;
 
   mean = 0.0;
-  for(i=0; i<data.n; i++)
+  for(i=0; i<n; i++)
   {
     mean += y[i];
   }
-  mean /= data.n;
-
-  N = n;
-  M = nb;
+  mean /= n;
 
   sigmaSqr = 0.0;
-  for(i=0; i<N; i++)
+  for(i=0; i<n; i++)
   {
     sigmaSqr += (y[i] - mean) * (y[i] - mean);
   }
-  sigmaSqr /= (N-1.0);
+  sigmaSqr /= (n-1.0);
   
   sSqrUp = 0.0;
   sSqrDown = 0.0;
-  for(i=0; i<M; i++)
+  for(i=0; i<nb; i++)
   {
     ic = 0;
     mean = 0.0;
-    for(j=0; j<N; j++)
+    for(j=0; j<n; j++)
     {
       if(phase[j] >= bbeg[i] && phase[j] < bend[i])
       {
@@ -144,7 +141,7 @@ double getTheta(double *phase, double *y, int n, double *bbeg, double *bend, int
     {
       mean /= ic;
       sigmaj = 0.0;
-      for(j=0; j<N; j++)
+      for(j=0; j<n; j++)
       {
         if(phase[j] >= bbeg[i] && phase[j] < bend[i])
         {
@@ -157,7 +154,7 @@ double getTheta(double *phase, double *y, int n, double *bbeg, double *bend, int
     }
   }
 
-  sSqrDown -= M;
+  sSqrDown -= nb;
 
   return sSqrUp/sSqrDown / sigmaSqr;
 }
