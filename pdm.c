@@ -16,53 +16,10 @@
 
 #include "pdm.h"
 
-int main(int argc, char **argv)
-{
-  FILE *fp;
-  int nd_max = 5000, nd;
-  double jd[nd_max],mag[nd_max];
-  int i, nbins, covers;
-  char buf[256];
-  double *periods, *thetas;
-
-  TypePDM * pdm;
-
-  nbins=10;
-  covers=3;
-
-  fp = fopen("test/con_all.txt", "r");
-  if(fp==NULL)
-  {
-    printf("Cannot open con_all.txt.\n");
-    exit(-1);
-  }
-
-  for(i=0; i<nd_max; i++)
-  {
-    fgets(buf, 256, fp);
-    sscanf(buf, "%lf %lf", &jd[i], &mag[i]);
-    if(feof(fp)!=0)
-      break;
-  }
-  fclose(fp);
-  nd = i;
-
-  pdm = mkPDM(jd, mag, nd, 1.0/(50.0*365.0), 1.0e-2+1.0/(50.0*365.0), 1.0e-5, 0);
-
-  periods = malloc(pdm->scanner->nVal * sizeof(double));
-  thetas = malloc(pdm->scanner->nVal * sizeof(double));
-
-  //pdmEquiBin(pdm, nbins, periods, thetas);
-
-  pdmEquiBinCover(pdm, nbins, covers, periods, thetas);
-
-  for(i=0; i<pdm->scanner->nVal; i++)
-  {
-    printf("%f %f\n", periods[i], thetas[i]);
-  }
-
-}
-
+/*!
+ * create a TypePDM instance.  
+ *
+ */
 TypePDM * mkPDM(double *jd, double *fs, int nd, double minVal, double maxVal, double dVal, int mode)
 {
   TypePDM *pdm = (TypePDM *)malloc(sizeof(TypePDM));
@@ -72,6 +29,10 @@ TypePDM * mkPDM(double *jd, double *fs, int nd, double minVal, double maxVal, do
 
   return pdm;
 }
+
+/*!
+ * free the TypePDM instance.
+ */
 void freePDM(TypePDM *pdm)
 {
   freeData(pdm->data);
@@ -80,6 +41,9 @@ void freePDM(TypePDM *pdm)
   return;
 }
 
+/*!
+ * create a Data instance.
+ */
 TypeData * mkData(double *jd, double *fs, int nd)
 {
   TypeData * d = (TypeData *) malloc(sizeof(TypeData));
@@ -385,14 +349,8 @@ void setUpEquiBlocks(int nbins, double *phaseSort, int n, double *bbeg, double *
   }
 
   *nb = nBlock;
-
-  /*printf("nb: %d\n", *nb);
-  for(i=0; i<*nb; i++)
-  {
-    printf("%d %f %f %d\n", i, bbeg[i], bend[i], Ns[i]);
-  }*/
-
   free(Ns);
+  return;
 }
 
 void setUpEquiBlocksCover(int nbins, int covers, double *bbeg, double *bend)
@@ -420,6 +378,9 @@ void setUpEquiBlocksCover(int nbins, int covers, double *bbeg, double *bend)
   return;
 }
 
+/*!
+ *  folding phase of a light curve with a given period. 
+ */
 void dophase(TypeData *data, double period, double *phase, int *order)
 {
   int i;
@@ -431,23 +392,28 @@ void dophase(TypeData *data, double period, double *phase, int *order)
 
   argsort(phase, order, data->n);
 
-  /*for(i=0; i<10; i++)
-  {
-    printf("%f %f %d\n", phase[i], phase[order[i]], order[i]);
-  }*/
   return;
 }
 
+/*!
+ * comparison function
+ */
 int cmp(const void *a, const void *b)
 {
   return (*(double *)a)>=(*(double *)b)?1:0;
 }
 
+/*!
+ * comparison function
+ */
 int cmp_sorter(const void *a, const void *b)
 {
   return ((TypeSorter *)a)->value>=((TypeSorter *)b)->value?1:0;
 }
 
+/*!
+ *  generate indices that would sort an array.
+ */
 void argsort(const double *x, int *order, int n)
 {
   int i;
