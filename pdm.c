@@ -46,22 +46,28 @@ int main(int argc, char **argv)
   nd = i;
   
   
-  setData(jd, mag, nd);
-  setScanner(1.0/(50.0*365.0), 1.0e-2+1.0/(50.0*365.0), 1.0e-5, 0);
+  pdmInit(jd, mag, nd, 1.0/(50.0*365.0), 1.0e-2+1.0/(50.0*365.0), 1.0e-5, 0);
 
   periods = malloc(scanner.nVal * sizeof(double));
   thetas = malloc(scanner.nVal * sizeof(double));
 
-  //pdmEquiBin(nbins, &scanner);
+  //pdmEquiBin(nbins, periods, thetas);
 
-  pdmEquiBinCover(nbins, covers, &scanner, periods, thetas);
+  pdmEquiBinCover(nbins, covers, periods, thetas);
 
   for(i=0; i<scanner.nVal; i++)
   {
     printf("%f %f\n", periods[i], thetas[i]);
   }
 
-  freeData();
+  pdmEnd();
+}
+
+void pdmInit(double *jd, double *fs, int nd, double minVal, double maxVal, double dVal, int mode)
+{
+  setData(jd, fs, nd);
+  setScanner(minVal, maxVal, dVal, mode);
+  return;
 }
 
 void setData(double *jd, double *fs, int nd)
@@ -91,7 +97,7 @@ void setScanner(double minVal, double maxVal, double dVal, int mode)
   scanner.mode = mode;
 }
 
-void freeData()
+void pdmEnd()
 {
   free(data.x);
   free(data.y);
@@ -156,7 +162,7 @@ double getTheta(double *phase, double *y, int n, double *bbeg, double *bend, int
   return sSqrUp/sSqrDown / sigmaSqr;
 }
 
-void pdmEquiBinCover(const int nbins, const int covers, const TypeScanner *scan, double *periods, double *thetas)
+void pdmEquiBinCover(const int nbins, const int covers, double *periods, double *thetas)
 {
   int i, j;
   double *phase, *phaseSort, *tmpy;
@@ -168,25 +174,25 @@ void pdmEquiBinCover(const int nbins, const int covers, const TypeScanner *scan,
   tmpy = malloc(2*data.n*sizeof(double));
   order = malloc(data.n*sizeof(int));
 
-  if(scan->mode == 0)
+  if(scanner.mode == 0)
   {
-    for(i=0; i<scan->nVal; i++)
+    for(i=0; i<scanner.nVal; i++)
     {
-      periods[i] = 1.0/(scan->minVal + i*scan->dVal);
+      periods[i] = 1.0/(scanner.minVal + i*scanner.dVal);
     }
   }
   else
   {
-    for(i=0; i<scan->nVal; i++)
+    for(i=0; i<scanner.nVal; i++)
     {
-      periods[i] = scan->minVal + i*scan->dVal;
+      periods[i] = scanner.minVal + i*scanner.dVal;
     }
   }
 
   bbeg = malloc(nbins*covers*sizeof(double));
   bend = malloc(nbins*covers*sizeof(double));
 
-  for(i=0; i<scan->nVal; i++)
+  for(i=0; i<scanner.nVal; i++)
   {
     dophase(periods[i], phase, order);
 
@@ -210,7 +216,7 @@ void pdmEquiBinCover(const int nbins, const int covers, const TypeScanner *scan,
   free(bend);
 }
 
-void pdmEquiBin(const int nbins, const TypeScanner *scan, double *periods, double *thetas)
+void pdmEquiBin(const int nbins, double *periods, double *thetas)
 {
   int i, j;
   double *phase, *phaseSort;
@@ -221,25 +227,25 @@ void pdmEquiBin(const int nbins, const TypeScanner *scan, double *periods, doubl
   phaseSort = malloc(data.n*sizeof(double));
   order = malloc(data.n*sizeof(int));
 
-  if(scan->mode == 0)
+  if(scanner.mode == 0)
   {
-    for(i=0; i<scan->nVal; i++)
+    for(i=0; i<scanner.nVal; i++)
     {
-      periods[i] = 1.0/(scan->minVal + i*scan->dVal);
+      periods[i] = 1.0/(scanner.minVal + i*scanner.dVal);
     }
   }
   else
   {
-    for(i=0; i<scan->nVal; i++)
+    for(i=0; i<scanner.nVal; i++)
     {
-      periods[i] = scan->minVal + i*scan->dVal;
+      periods[i] = scanner.minVal + i*scanner.dVal;
     }
   }
 
   bbeg = malloc(nbins*sizeof(double));
   bend = malloc(nbins*sizeof(double));
 
-  for(i=0; i<scan->nVal; i++)
+  for(i=0; i<scanner.nVal; i++)
   {
     dophase(periods[i], phase, order);
     
