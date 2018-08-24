@@ -2,30 +2,32 @@ SHELL=/bin/bash
 CC       = gcc 
 OPTIMIZE = -O2 -Wall -finline-functions
 
-LIBPDM  = libpdm.so
-EXEC     = pdm
+LIBPDM  = libcpdm.so
+EXEC     = cpdm
 SRC      = ./
 
 all: $(LIBPDM) $(EXEC)
 
-LIBOBJS = $(SRC)/pdm.o 
-OBJS = $(SRC)/main.o
+LIBOBJS = $(SRC)/cpdm.o 
+OBJS = $(SRC)/demo.o
 
 OPTIONS  = $(OPTIMIZE)
 CFLAGS   = $(OPTIONS) 
 LIBS     = -lm
 
-INCL     = Makefile $(SRC)/pdm.h
+INCL     = Makefile $(SRC)/cpdm.h
 
 $(LIBPDM): $(LIBOBJS)
 	cd $(SRC)
-	$(CC) $(OPTIMIZE) $(CFLAGS) $(LIBS) -fPIC -shared -o libpdm.so $(SRC)/pdm.c
+	$(CC) $(OPTIMIZE) $(CFLAGS) $(LIBS) -fPIC -shared -o libcpdm.so $(SRC)/cpdm.c
 
 $(EXEC): $(OBJS)
 	cd $(SRC)
-	$(CC) $(OPTIMIZE) $(CFLAGS) $(OBJS) $(LIBS)  -L./ -lpdm -o $@
+	$(CC) $(OPTIMIZE) $(CFLAGS) $(OBJS) $(LIBS)  -L./ -lcpdm -o $@
 
 $(OBJS): $(INCL)
 
+$(LIBOBJS): $(INCL)
+
 clean:
-	rm $(SRC)/*.o $(EXEC)
+	rm $(SRC)/*.o $(EXEC) $(LIBPDM)

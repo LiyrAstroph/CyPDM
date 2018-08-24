@@ -14,18 +14,33 @@
 #include <string.h>
 #include <limits.h>
 
-#include "pdm.h"
+#include "cpdm.h"
 
 /*!
  * create a TypePDM instance.  
  *
  */
-TypePDM * mkPDM(double *jd, double *fs, int nd, double minVal, double maxVal, double dVal, int mode)
+TypePDM * cmkPDM(double *jd, double *fs, unsigned int nd, unsigned int nbins, unsigned int covers)
 {
   TypePDM *pdm = (TypePDM *)malloc(sizeof(TypePDM));
 
-  pdm->data = mkData(jd, fs, nd);
-  pdm->scanner = mkScanner(minVal, maxVal, dVal, mode);
+  pdm->nbins = nbins;
+  pdm->covers = covers; 
+  pdm->n = nd;
+  pdm->x = (double *)malloc(nd*sizeof(double));
+  pdm->y = (double *)malloc(nd*sizeof(double));
+
+  memcpy(pdm->x, jd, nd*sizeof(double));
+  memcpy(pdm->y, fs, nd*sizeof(double));
+
+  if(pdm->x[0]!=0)
+  {
+    int i;
+    for(i=nd-1; i>=0; i--)
+    {
+      pdm->x[i] -= pdm->x[0];
+    }
+  }
 
   return pdm;
 }
@@ -33,66 +48,30 @@ TypePDM * mkPDM(double *jd, double *fs, int nd, double minVal, double maxVal, do
 /*!
  * free the TypePDM instance.
  */
-void freePDM(TypePDM *pdm)
+void cfreePDM(TypePDM *pdm)
 {
-  freeData(pdm->data);
-  freeScanner(pdm->scanner);
+  free(pdm->x);
+  free(pdm->y);
   free(pdm);
   return;
 }
 
-/*!
- * create a Data instance.
- */
-TypeData * mkData(double *jd, double *fs, int nd)
+
+void cpdm(TypePDM *pdm, double *periods, double *thetas, unsigned int np)
 {
-  TypeData * d = (TypeData *) malloc(sizeof(TypeData));
-  int i;
-
-  d->n = nd;
-  d->x = (double *)malloc(nd*sizeof(double));
-  d->y = (double *)malloc(nd*sizeof(double));
-
-  memcpy(d->x, jd, nd*sizeof(double));
-  memcpy(d->y, fs, nd*sizeof(double));
-
-  for(i=nd-1; i>=0; i--)
+  if(pdm->covers == 0)
   {
-    d->x[i] -= d->x[0];
+    cpdmEquiBin(pdm, periods, thetas, np);
   }
-  
-  return d;
+  else
+  {
+    cpdmEquiBinCover(pdm, periods, thetas, np);
+  }
 }
 
-void freeData(TypeData *d)
+double cgetTheta(double *phase, double *y, unsigned int n, double *bbeg, double *bend, unsigned int nb)
 {
-  free(d->x);
-  free(d->y);
-
-  free(d);
-  return;
-}
-
-TypeScanner * mkScanner(double minVal, double maxVal, double dVal, int mode)
-{
-  TypeScanner * scan = (TypeScanner *)malloc(sizeof(TypeScanner));
-  scan->nVal = ceil((maxVal - minVal)/dVal + 1);
-  scan->minVal = minVal;
-  scan->maxVal = maxVal;
-  scan->dVal = dVal;
-  scan->mode = mode;
-
-  return scan;
-}
-
-void freeScanner(TypeScanner * scan)
-{
-  free(scan);
-}
-
-double getTheta(double *phase, double *y, int n, double *bbeg, double *bend, int nb)
-{
-  int i, j, ic;
+  unsigned int i, j, ic;
   double mean, sigmaSqr, sSqrUp, sSqrDown, sigmaj;
 
   mean = 0.0;
@@ -146,53 +125,36 @@ double getTheta(double *phase, double *y, int n, double *bbeg, double *bend, int
   return sSqrUp/sSqrDown / sigmaSqr;
 }
 
-void pdmEquiBinCover(TypePDM *pdm, const int nbins, const int covers, double *periods, double *thetas)
+void cpdmEquiBinCover(TypePDM *pdm, double *periods, double *thetas, unsigned int np)
 {
-  int i, j;
+  unsigned int i, j;
   double *phase, *phaseSort, *tmpy;
   double *bbeg, *bend;
-  int *order;
+  unsigned int *order;
 
-  TypeScanner * scan = pdm->scanner;
-  TypeData * d = pdm->data;
+  phase = malloc(pdm->n*sizeof(double));
+  phaseSort = malloc(2*pdm->n*sizeof(double));
+  tmpy = malloc(2*pdm->n*sizeof(double));
+  order = malloc(pdm->n*sizeof(unsigned int));
 
-  phase = malloc(d->n*sizeof(double));
-  phaseSort = malloc(2*d->n*sizeof(double));
-  tmpy = malloc(2*d->n*sizeof(double));
-  order = malloc(d->n*sizeof(int));
 
-  if(scan->mode == 0)
+  bbeg = malloc(pdm->nbins*pdm->covers*sizeof(double));
+  bend = malloc(pdm->nbins*pdm->covers*sizeof(double));
+
+  for(i=0; i<np; i++)
   {
-    for(i=0; i<scan->nVal; i++)
-    {
-      periods[i] = 1.0/(scan->minVal + i*scan->dVal);
-    }
-  }
-  else
-  {
-    for(i=0; i<scan->nVal; i++)
-    {
-      periods[i] = scan->minVal + i*scan->dVal;
-    }
-  }
+    cdophase(pdm->x, pdm->n, periods[i], phase, order);
 
-  bbeg = malloc(nbins*covers*sizeof(double));
-  bend = malloc(nbins*covers*sizeof(double));
-
-  for(i=0; i<scan->nVal; i++)
-  {
-    dophase(pdm->data, periods[i], phase, order);
-
-    for(j=0; j<d->n; j++)
+    for(j=0; j<pdm->n; j++)
     {
       phaseSort[j] = phase[order[j]];
-      phaseSort[j+d->n] = phaseSort[j] + 1.0;
-      tmpy[j] = d->y[order[j]];
-      tmpy[j+d->n] = tmpy[j];
+      phaseSort[j+pdm->n] = phaseSort[j] + 1.0;
+      tmpy[j] = pdm->y[order[j]];
+      tmpy[j+pdm->n] = tmpy[j];
     }
         
-    setUpEquiBlocksCover(nbins, covers, bbeg,  bend);
-    thetas[i]=getTheta(phaseSort, tmpy, 2*d->n, bbeg, bend, nbins*covers);
+    csetUpEquiBlocksCover(pdm->nbins, pdm->covers, bbeg,  bend);
+    thetas[i]=cgetTheta(phaseSort, tmpy, 2*pdm->n, bbeg, bend, pdm->nbins*pdm->covers);
   }
 
   free(phase);
@@ -203,49 +165,31 @@ void pdmEquiBinCover(TypePDM *pdm, const int nbins, const int covers, double *pe
   free(bend);
 }
 
-void pdmEquiBin(TypePDM *pdm, const int nbins, double *periods, double *thetas)
+void cpdmEquiBin(TypePDM *pdm, double *periods, double *thetas, unsigned int np)
 {
-  int i, j;
+  unsigned int i, j;
   double *phase, *phaseSort;
   double *bbeg, *bend;
-  int *order, nb;
+  unsigned int *order, nb;
 
-  TypeScanner * scan = pdm->scanner;
-  TypeData * d = pdm->data;
+  phase = malloc(pdm->n*sizeof(double));
+  phaseSort = malloc(pdm->n*sizeof(double));
+  order = malloc(pdm->n*sizeof(unsigned int));
 
-  phase = malloc(d->n*sizeof(double));
-  phaseSort = malloc(d->n*sizeof(double));
-  order = malloc(d->n*sizeof(int));
+  bbeg = malloc(pdm->nbins*sizeof(double));
+  bend = malloc(pdm->nbins*sizeof(double));
 
-  if(scan->mode == 0)
+  for(i=0; i<np; i++)
   {
-    for(i=0; i<scan->nVal; i++)
-    {
-      periods[i] = 1.0/(scan->minVal + i*scan->dVal);
-    }
-  }
-  else
-  {
-    for(i=0; i<scan->nVal; i++)
-    {
-      periods[i] = scan->minVal + i*scan->dVal;
-    }
-  }
-
-  bbeg = malloc(nbins*sizeof(double));
-  bend = malloc(nbins*sizeof(double));
-
-  for(i=0; i<scan->nVal; i++)
-  {
-    dophase(pdm->data, periods[i], phase, order);
+    cdophase(pdm->x, pdm->n, periods[i], phase, order);
     
-    for(j=0; j<d->n;j++)
+    for(j=0; j<pdm->n;j++)
     {
       phaseSort[j] = phase[order[j]];
     }
     
-    setUpEquiBlocks(nbins, phaseSort, d->n, bbeg,  bend, &nb);
-    thetas[i]=getTheta(phase, d->y, d->n, bbeg, bend, nb);
+    csetUpEquiBlocks(pdm->nbins, phaseSort, pdm->n, bbeg,  bend, &nb);
+    thetas[i]=cgetTheta(phase, pdm->y, pdm->n, bbeg, bend, nb);
   }
   
   free(phase);
@@ -256,10 +200,10 @@ void pdmEquiBin(TypePDM *pdm, const int nbins, double *periods, double *thetas)
 }
 
 
-void setUpEquiBlocks(int nbins, double *phaseSort, int n, double *bbeg, double *bend, int *nb)
+void csetUpEquiBlocks(unsigned int nbins, double *phaseSort, unsigned int n, double *bbeg, double *bend, unsigned int *nb)
 {
-  int i, j, ic;
-  int *Ns;
+  unsigned int i, j, ic;
+  unsigned int *Ns;
   int nBlock, iPlus, iMinu, NPlus, NMinu;
   double *blockBegin, *blockEnd;
   int badBlock;
@@ -273,7 +217,7 @@ void setUpEquiBlocks(int nbins, double *phaseSort, int n, double *bbeg, double *
     blockEnd[i] = (i+1)*1.0/nbins;
   }
   
-  Ns = malloc(nbins * sizeof(int));
+  Ns = malloc(nbins * sizeof(unsigned int));
 
   for(i=0; i<nBlock; i++)
   {
@@ -353,9 +297,9 @@ void setUpEquiBlocks(int nbins, double *phaseSort, int n, double *bbeg, double *
   return;
 }
 
-void setUpEquiBlocksCover(int nbins, int covers, double *bbeg, double *bend)
+void csetUpEquiBlocksCover(unsigned int nbins, unsigned int covers, double *bbeg, double *bend)
 {
-  int i, j;
+  unsigned int i, j;
   double offset;
 
   for(i=0; i<nbins; i++)
@@ -363,8 +307,7 @@ void setUpEquiBlocksCover(int nbins, int covers, double *bbeg, double *bend)
     bbeg[i]  = i*1.0/nbins;
     bend[i] =  (i+1)*1.0/nbins;
   }
-  
-  offset = 0.0;
+
   for(i=1; i<covers; i++)
   {
     offset = i*1.0/(nbins*covers);
@@ -381,16 +324,16 @@ void setUpEquiBlocksCover(int nbins, int covers, double *bbeg, double *bend)
 /*!
  *  folding phase of a light curve with a given period. 
  */
-void dophase(TypeData *data, double period, double *phase, int *order)
+void cdophase(double *x, unsigned int n, double period, double *phase, unsigned int *order)
 {
-  int i;
+  unsigned int i;
 
-  for(i=0; i<data->n; i++)
+  for(i=0; i<n; i++)
   {
-    phase[i] = data->x[i]/period - floor(data->x[i]/period);
+    phase[i] = x[i]/period - floor(x[i]/period);
   }
 
-  argsort(phase, order, data->n);
+  cargsort(phase, order, n);
 
   return;
 }
@@ -398,15 +341,7 @@ void dophase(TypeData *data, double period, double *phase, int *order)
 /*!
  * comparison function
  */
-int cmp(const void *a, const void *b)
-{
-  return (*(double *)a)>=(*(double *)b)?1:0;
-}
-
-/*!
- * comparison function
- */
-int cmp_sorter(const void *a, const void *b)
+int ccmp_sorter(const void *a, const void *b)
 {
   return ((TypeSorter *)a)->value>=((TypeSorter *)b)->value?1:0;
 }
@@ -414,16 +349,16 @@ int cmp_sorter(const void *a, const void *b)
 /*!
  *  generate indices that would sort an array.
  */
-void argsort(const double *x, int *order, int n)
+void cargsort(const double *x, unsigned int *order, unsigned int n)
 {
-  int i;
+  unsigned int i;
   TypeSorter *sort = malloc(n*sizeof(TypeSorter));
   for(i=0; i<n; i++)
   {
     sort[i].i=i;
     sort[i].value=x[i];
   }
-  qsort(sort, n, sizeof(TypeSorter), cmp_sorter);
+  qsort(sort, n, sizeof(TypeSorter), ccmp_sorter);
 
   for(i=0; i<n; i++)
     order[i] = sort[i].i;
