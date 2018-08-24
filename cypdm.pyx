@@ -9,6 +9,24 @@ cimport numpy as np
 
 ctypedef double DTYPE_t
 
+
+"""
+ * CyPDM
+ * 
+ * A fast package to apply the phase disperion minimization (PDM) algorithm, 
+ * based on PyAstronomy module PyPDM (https://github.com/sczesla/PyAstronomy).
+ *
+ * This is a Cython verison with improved computation speed.
+ * 
+ * The PDM alogrithm refers to the reference:
+ *    http://adsabs.harvard.edu/abs/1978ApJ...224..953S
+ *
+ *
+ * Author:
+ *   Yan-Rong Li, liyanrong@mail.ihep.ac.cn
+ * 
+"""
+
 cdef extern from "cpdm.h":
   ctypedef struct TypePDM
 
@@ -16,20 +34,20 @@ cdef extern from "cpdm.h":
 
   void cfreePDM(TypePDM * pdm)
 
-  void cpdmEquiBin(TypePDM *pdm, double *datax, double *datay, unsigned int nd, \
-    double *periods, double *thetas, unsigned int nper)
+  void cpdmEquiBin(TypePDM *pdm, DTYPE_t *datax, DTYPE_t *datay, unsigned int nd, \
+    DTYPE_t *periods, DTYPE_t *thetas, unsigned int nper)
 
-  void cpdmEquiBinCover(TypePDM *pdm, double *datax, double *datay, unsigned int nd, \
-    double *periods, double *thetas, unsigned int nper)
+  void cpdmEquiBinCover(TypePDM *pdm, DTYPE_t *datax, DTYPE_t *datay, unsigned int nd, \
+    DTYPE_t *periods, DTYPE_t *thetas, unsigned int nper)
 
-  void cpdm(TypePDM *pdm, double *datax, double *datay, unsigned int nd, \
-    double *periods, double *thetas, unsigned int nper)
+  void cpdm(TypePDM *pdm, DTYPE_t *datax, DTYPE_t *datay, unsigned int nd, \
+    DTYPE_t *periods, DTYPE_t *thetas, unsigned int nper)
 
 
 cdef class PyPDM:
   cdef TypePDM * _thisptr
-  cdef double *jd
-  cdef double *fs
+  cdef DTYPE_t *jd
+  cdef DTYPE_t *fs
   cdef unsigned int n
   cdef unsigned int nbins
   cdef unsigned int covers
@@ -47,8 +65,8 @@ cdef class PyPDM:
     self.covers = covers
     self.n = len(jd)
 
-    self.jd = <double *>PyMem_Malloc(self.n * sizeof(DTYPE_t))
-    self.fs = <double *>PyMem_Malloc(self.n * sizeof(DTYPE_t))
+    self.jd = <DTYPE_t *>PyMem_Malloc(self.n * sizeof(DTYPE_t))
+    self.fs = <DTYPE_t *>PyMem_Malloc(self.n * sizeof(DTYPE_t))
 
     for i in range(self.n):
       self.jd[i] = jd[i]
@@ -88,17 +106,17 @@ cdef class PyPDM:
   cpdef getPDM(self, np.ndarray[DTYPE_t, ndim=1] periods):
     thetas = np.empty_like(periods)
     cpdm(self._thisptr, self.jd, self.fs, self.n,  \
-      <double *>np.PyArray_DATA(periods), <double *>np.PyArray_DATA(thetas), len(periods))
+      <DTYPE_t *>np.PyArray_DATA(periods), <DTYPE_t *>np.PyArray_DATA(thetas), len(periods))
     return thetas
 
   cpdef getPDM_EquiBin(self, np.ndarray[DTYPE_t, ndim=1] periods):
     thetas = np.empty_like(periods)
     cpdmEquiBin(self._thisptr, self.jd, self.fs, self.n, \
-      <double *>np.PyArray_DATA(periods), <double *>np.PyArray_DATA(thetas), len(periods))
+      <DTYPE_t *>np.PyArray_DATA(periods), <DTYPE_t *>np.PyArray_DATA(thetas), len(periods))
     return thetas
 
   cpdef getPDM_EquiBinCover(self, np.ndarray[DTYPE_t, ndim=1] periods):
     thetas = np.empty_like(periods)
     cpdmEquiBinCover(self._thisptr, self.jd, self.fs, self.n, \
-      <double *>np.PyArray_DATA(periods), <double *>np.PyArray_DATA(thetas), len(periods))
+      <DTYPE_t *>np.PyArray_DATA(periods), <DTYPE_t *>np.PyArray_DATA(thetas), len(periods))
     return thetas
