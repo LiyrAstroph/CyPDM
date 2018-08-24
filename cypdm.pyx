@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#cython: initializedcheck=False, boundscheck=False, wraparound=False, cdivision=False, profile=False
+#cython: initializedcheck=False, boundscheck=False, wraparound=False, cdivision=True, profile=False
 
 cimport cython
 from cpython.mem cimport PyMem_Malloc, PyMem_Free, PyMem_Realloc

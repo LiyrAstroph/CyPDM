@@ -1,3 +1,20 @@
+/*
+ * CyPDM
+ * 
+ * A fast package to apply the phase disperion minimization (PDM) algorithm, 
+ * based on PyAstronomy module PyPDM (https://github.com/sczesla/PyAstronomy).
+ *
+ * This is a C verison with improved computation speed.
+ * 
+ * The PDM alogrithm refers to the reference:
+ *    http://adsabs.harvard.edu/abs/1978ApJ...224..953S
+ *
+ *
+ * Author:
+ *   Yan-Rong Li, liyanrong@mail.ihep.ac.cn
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
