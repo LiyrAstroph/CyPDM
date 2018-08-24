@@ -23,8 +23,6 @@ typedef struct
 
 typedef struct 
 {
-  int n;
-  double *x, *y;
   unsigned int nbins, covers;
 }TypePDM;
 
@@ -33,11 +31,11 @@ int ccmp_sorter(const void *a, const void *b);
 void cargsort(const double *x, unsigned int *order, unsigned int n);
 void csetUpEquiBlocks(unsigned int nbins, double *phase, unsigned int n, double *bbeg, double *bend, unsigned int *nb);
 void csetUpEquiBlocksCover(unsigned int nbins, unsigned int covers, double *bbeg, double *bend);
-void cpdmEquiBin(TypePDM *pdm, double *periods, double *thetas, unsigned int np);
-void cpdmEquiBinCover(TypePDM *pdm, double *periods, double *thetas, unsigned int np);
+void cpdmEquiBin(TypePDM *pdm, double *datax, double *datay, unsigned int nd, double *periods, double *thetas, unsigned int np);
+void cpdmEquiBinCover(TypePDM *pdm, double *datax, double *datay, unsigned int nd, double *periods, double *thetas, unsigned int np);
 double cgetTheta(double *phase, double *y, unsigned int n, double *bbeg, double *bend, unsigned int nb);
-void cpdm(TypePDM *pdm, double *periods, double *thetas, unsigned int np);
+void cpdm(TypePDM *pdm, double *datax, double *datay, unsigned int nd, double *periods, double *thetas, unsigned int np);
 
-TypePDM * cmkPDM(double *jd, double *fs, unsigned int nd, unsigned int mode, unsigned int type);
+TypePDM * cmkPDM(unsigned int mode, unsigned int type);
 void cfreePDM(TypePDM *pdm);
 #endif

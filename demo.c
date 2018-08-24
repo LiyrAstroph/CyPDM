@@ -31,12 +31,16 @@ int readData(double *jd, double *mag, int *nd)
   fclose(fp);
   *nd = i;
 
+  for(i=*nd-1; i>=0; i--)
+  {
+    jd[i] -= jd[0];
+  }
   return 0;
 }
 
 int main(int argc, char **argv)
 {
-  int nd, np = 1000;
+  int nd, np = 995;
   int i, nbins, covers;
   double jd[nd_max], mag[nd_max];
   double *periods, *thetas;
@@ -46,7 +50,7 @@ int main(int argc, char **argv)
   thetas = malloc(np * sizeof(double));
 
   nbins=10;
-  covers=3;
+  covers=0;
 
   for(i=0; i<np; i++)
   {
@@ -56,9 +60,9 @@ int main(int argc, char **argv)
 
   readData(jd, mag, &nd);
 
-  pdm = cmkPDM(jd, mag, nd, nbins, covers);
+  pdm = cmkPDM(nbins, covers);
 
-  cpdm(pdm, periods, thetas, np);
+  cpdm(pdm, jd, mag, nd, periods, thetas, np);
 
   for(i=0; i<np; i++)
   {

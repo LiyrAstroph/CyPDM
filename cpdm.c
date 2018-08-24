@@ -20,27 +20,12 @@
  * create a TypePDM instance.  
  *
  */
-TypePDM * cmkPDM(double *jd, double *fs, unsigned int nd, unsigned int nbins, unsigned int covers)
+TypePDM * cmkPDM(unsigned int nbins, unsigned int covers)
 {
   TypePDM *pdm = (TypePDM *)malloc(sizeof(TypePDM));
 
   pdm->nbins = nbins;
   pdm->covers = covers; 
-  pdm->n = nd;
-  pdm->x = (double *)malloc(nd*sizeof(double));
-  pdm->y = (double *)malloc(nd*sizeof(double));
-
-  memcpy(pdm->x, jd, nd*sizeof(double));
-  memcpy(pdm->y, fs, nd*sizeof(double));
-
-  if(pdm->x[0]!=0)
-  {
-    int i;
-    for(i=nd-1; i>=0; i--)
-    {
-      pdm->x[i] -= pdm->x[0];
-    }
-  }
 
   return pdm;
 }
@@ -50,22 +35,20 @@ TypePDM * cmkPDM(double *jd, double *fs, unsigned int nd, unsigned int nbins, un
  */
 void cfreePDM(TypePDM *pdm)
 {
-  free(pdm->x);
-  free(pdm->y);
   free(pdm);
   return;
 }
 
 
-void cpdm(TypePDM *pdm, double *periods, double *thetas, unsigned int np)
+void cpdm(TypePDM *pdm, double *datax, double *datay, unsigned int nd, double *periods, double *thetas, unsigned int np)
 {
   if(pdm->covers == 0)
   {
-    cpdmEquiBin(pdm, periods, thetas, np);
+    cpdmEquiBin(pdm, datax, datay, nd, periods, thetas, np);
   }
   else
   {
-    cpdmEquiBinCover(pdm, periods, thetas, np);
+    cpdmEquiBinCover(pdm, datax, datay, nd, periods, thetas, np);
   }
 }
 
@@ -125,17 +108,17 @@ double cgetTheta(double *phase, double *y, unsigned int n, double *bbeg, double 
   return sSqrUp/sSqrDown / sigmaSqr;
 }
 
-void cpdmEquiBinCover(TypePDM *pdm, double *periods, double *thetas, unsigned int np)
+void cpdmEquiBinCover(TypePDM *pdm, double *datax, double *datay, unsigned int nd, double *periods, double *thetas, unsigned int np)
 {
   unsigned int i, j;
   double *phase, *phaseSort, *tmpy;
   double *bbeg, *bend;
   unsigned int *order;
 
-  phase = malloc(pdm->n*sizeof(double));
-  phaseSort = malloc(2*pdm->n*sizeof(double));
-  tmpy = malloc(2*pdm->n*sizeof(double));
-  order = malloc(pdm->n*sizeof(unsigned int));
+  phase = malloc(nd*sizeof(double));
+  phaseSort = malloc(2*nd*sizeof(double));
+  tmpy = malloc(2*nd*sizeof(double));
+  order = malloc(nd*sizeof(unsigned int));
 
 
   bbeg = malloc(pdm->nbins*pdm->covers*sizeof(double));
@@ -143,18 +126,18 @@ void cpdmEquiBinCover(TypePDM *pdm, double *periods, double *thetas, unsigned in
 
   for(i=0; i<np; i++)
   {
-    cdophase(pdm->x, pdm->n, periods[i], phase, order);
+    cdophase(datax, nd, periods[i], phase, order);
 
-    for(j=0; j<pdm->n; j++)
+    for(j=0; j<nd; j++)
     {
       phaseSort[j] = phase[order[j]];
-      phaseSort[j+pdm->n] = phaseSort[j] + 1.0;
-      tmpy[j] = pdm->y[order[j]];
-      tmpy[j+pdm->n] = tmpy[j];
+      phaseSort[j+nd] = phaseSort[j] + 1.0;
+      tmpy[j] = datay[order[j]];
+      tmpy[j+nd] = tmpy[j];
     }
         
     csetUpEquiBlocksCover(pdm->nbins, pdm->covers, bbeg,  bend);
-    thetas[i]=cgetTheta(phaseSort, tmpy, 2*pdm->n, bbeg, bend, pdm->nbins*pdm->covers);
+    thetas[i]=cgetTheta(phaseSort, tmpy, 2*nd, bbeg, bend, pdm->nbins*pdm->covers);
   }
 
   free(phase);
@@ -165,31 +148,31 @@ void cpdmEquiBinCover(TypePDM *pdm, double *periods, double *thetas, unsigned in
   free(bend);
 }
 
-void cpdmEquiBin(TypePDM *pdm, double *periods, double *thetas, unsigned int np)
+void cpdmEquiBin(TypePDM *pdm, double *datax, double *datay, unsigned int nd, double *periods, double *thetas, unsigned int np)
 {
   unsigned int i, j;
   double *phase, *phaseSort;
   double *bbeg, *bend;
   unsigned int *order, nb;
 
-  phase = malloc(pdm->n*sizeof(double));
-  phaseSort = malloc(pdm->n*sizeof(double));
-  order = malloc(pdm->n*sizeof(unsigned int));
+  phase = malloc(nd*sizeof(double));
+  phaseSort = malloc(nd*sizeof(double));
+  order = malloc(nd*sizeof(unsigned int));
 
   bbeg = malloc(pdm->nbins*sizeof(double));
   bend = malloc(pdm->nbins*sizeof(double));
 
   for(i=0; i<np; i++)
   {
-    cdophase(pdm->x, pdm->n, periods[i], phase, order);
+    cdophase(datax, nd, periods[i], phase, order);
     
-    for(j=0; j<pdm->n;j++)
+    for(j=0; j<nd;j++)
     {
       phaseSort[j] = phase[order[j]];
     }
     
-    csetUpEquiBlocks(pdm->nbins, phaseSort, pdm->n, bbeg,  bend, &nb);
-    thetas[i]=cgetTheta(phase, pdm->y, pdm->n, bbeg, bend, nb);
+    csetUpEquiBlocks(pdm->nbins, phaseSort, nd, bbeg,  bend, &nb);
+    thetas[i]=cgetTheta(phase, datay, nd, bbeg, bend, nb);
   }
   
   free(phase);
