@@ -103,6 +103,17 @@ cdef class PyPDM:
       self.jd[i] = jd[i]
       self.fs[i] = fs[i]
 
+  cpdef setScan(self, unsigned int nbins, unsigned int covers):
+    if nbins <= 0:
+      msg = "nbins=%d incorrect."%nbins
+      raise ValueError(msg)
+    if covers <= 0:
+      msg = "covers=%d incorrect."%covers
+      raise ValueError(msg)
+
+    self.nbins = nbins
+    self.covers = covers
+
   cpdef getPDM(self, np.ndarray[DTYPE_t, ndim=1] periods):
     thetas = np.empty_like(periods)
     cpdm(self._thisptr, self.jd, self.fs, self.n,  \
