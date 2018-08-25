@@ -36,4 +36,30 @@ myt2 = pdm.getPDM_EquiBin(myp)
 
 This loads data from file "con_all.txt" and calculates PDMs.
 
+# Comparison with PyPDM
 
+PyPDM is distributed in PyAstronomy package, which written in pure Python with severe additional overhead.
+
+![Comparison between CyPDM and PyPDM](https://github.com/liyropt/MyGithubPic/blob/master/cypdm_cmp.jpg)
+
+Running the test codes of CyPDM in the test directory of this package using my own desktop 
+```bash
+time python test_cypdm.py
+```
+gives the time statistics
+```bash
+real	0m0.250s
+user	0m0.380s
+sys	0m0.394s
+```
+As a comparison, running the test codes of PyPDM
+```bash
+time python test_pya.py
+```
+gives 
+```bash
+real	0m0.809s
+user	0m1.042s
+sys	0m0.839s
+```
+CyPDM speeds up by a factor of 3-4. (Of course, the time statistics depend on data size.)
