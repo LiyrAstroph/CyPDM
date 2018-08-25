@@ -2,10 +2,6 @@ import sys
 import numpy as np 
 from PyAstronomy.pyTiming import pyPDM
 
-con = np.loadtxt("con_all.txt", usecols=(0, 1))
-t0 = con[0, 0]
-con[:, 0] -= t0
-
 nbins=10
 covers=3
 
