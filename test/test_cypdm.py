@@ -13,7 +13,7 @@ jd = np.linspace(0.0, 100.0, nd, dtype=np.double)
 fs = np.sin(jd/P * 2.0*np.pi) + np.random.randn(nd)*0.1
 
 pdm = cypdm.CyPDM(jd, fs, nbins, covers)
-myp = 1.0/np.linspace(1.0/50.0/365.0, 1.0e-2, 995, dtype=np.double)
+myp = 1.0/np.linspace(1.0/50.0/365.0, 1.0e-2, 9801, dtype=np.double)
 myt1 = pdm.getPDM_EquiBinCover(myp)
 myt2 = pdm.getPDM_EquiBin(myp)
 

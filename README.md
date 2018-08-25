@@ -32,7 +32,7 @@ fs = np.sin(jd/P * 2.0*np.pi) + np.random.randn(nd)*0.1
 # create a CyPDM instance with 10 bins and 3 covers
 pdm = cypdm.CyPDM(jd, fs, 10, 3)
 # setup period grid
-myp = 1.0/np.linspace(1.0/50.0/365.0, 1.0e-2, 995, dtype=np.double)
+myp = 1.0/np.linspace(1.0/50.0, 1.0e-2, 10000, dtype=np.double)
 # get PDM using equidistant bins and covers
 myt1 = pdm.getPDM_EquiBinCover(myp)
 # get PDM using equidistant bins (no covers)
@@ -64,9 +64,9 @@ time python test_cypdm.py
 ```
 gives the time statistics
 ```bash
-real	0m0.250s
-user	0m0.380s
-sys	0m0.394s
+real    0m1.714s
+user    0m1.897s
+sys 0m0.498s
 ```
 As a comparison, running the test codes of PyPDM
 ```bash
@@ -74,8 +74,8 @@ time python test_pya.py
 ```
 gives 
 ```bash
-real	0m0.809s
-user	0m1.042s
-sys	0m0.839s
+real    0m8.394s
+user    0m8.634s
+sys 0m0.909s
 ```
 CyPDM speeds up by a factor of 3-4. (Of course, the time statistics depend on data size.)
