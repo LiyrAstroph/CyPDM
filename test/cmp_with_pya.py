@@ -1,51 +1,59 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from PyAstronomy.pyTiming import pyPDM
-import sys;
+import sys
 sys.path.append("../")
 import cypdm 
 
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif', size=12)
 
-nbins = 10
+nbins = 5
 covers = 3
 
-cres1 = np.loadtxt("cresult1.txt")
-cres2 = np.loadtxt("cresult2.txt")
+nd = 1000
+P = 10.0
+jd = np.linspace(0.0, 100.0, nd, dtype=np.double)
+fs = np.sin(jd/P * 2.0*np.pi) + np.random.randn(nd)*0.1
 
-con = np.loadtxt("con_all.txt")
-t0 = con[0, 0]
-con[:, 0] -= t0
 
-S = pyPDM.Scanner(minVal=1.0/(50.0*365.0), maxVal=1.0e-2, dVal=1.0e-5, mode="frequency")
-P = pyPDM.PyPDM(con[:, 0], con[:, 1])
+S = pyPDM.Scanner(minVal=1.0/(50.0), maxVal=1.0e0, dVal=1.0e-4, mode="frequency")
+P = pyPDM.PyPDM(jd, fs)
 f1, t1 = P.pdmEquiBinCover(nbins, covers, S)
 f2, t2 = P.pdmEquiBin(nbins, S)
 
-pdm = cypdm.PyPDM(con[:, 0], con[:, 1], nbins, covers)
+pdm = cypdm.PyPDM(jd, fs, nbins, covers)
 myp = 1.0/f1
 myt1 = pdm.getPDM_EquiBinCover(myp)
 myt2 = pdm.getPDM_EquiBin(myp)
 
-fig = plt.figure(figsize=(8, 6))
-ax = fig.add_subplot(211)
+fig = plt.figure(figsize=(8, 9))
+ax = fig.add_subplot(311)
+ax.plot(jd, fs)
+ax.set_xlabel(r"Time")
+ax.set_ylabel(r"Flux")
+
+ax = fig.add_subplot(312)
 plt.plot(1.0/f1, t1, color='k', label="PyAstronomy")
 plt.plot(myp, myt1,color='g', marker='o', markersize=2, label="CyPDM")
-plt.plot(cres1[:, 0], cres1[:, 1], color='b', label="CPDM")
 
 ax.legend()
 ax.set_xlabel(r"Period")
 ax.set_ylabel(r"$\Theta_{\rm PDM}$")
 
-ax = fig.add_subplot(212)
+ax.text(40.0, 0.45, r"EquiBinCover")
+
+ax = fig.add_subplot(313)
 plt.plot(1.0/f2, t2, color='k', label="PyAstronomy")
 plt.plot(myp, myt2,color='g', marker='o', markersize=2, label="CyPDM")
-plt.plot(cres2[:, 0], cres2[:, 1], color='b', label="CPDM")
 
 ax.legend()
 
 ax.set_xlabel(r"Period")
 ax.set_ylabel(r"$\Theta_{\rm PDM}$")
 
+ax.text(40.0, 0.45, r"EquiBin")
+
+
+fig.savefig("cypdm_cmp.jpg", bbox_inches='tight')
 plt.show()
