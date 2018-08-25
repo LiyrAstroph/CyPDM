@@ -22,7 +22,7 @@ P = pyPDM.PyPDM(jd, fs)
 f1, t1 = P.pdmEquiBinCover(nbins, covers, S)
 f2, t2 = P.pdmEquiBin(nbins, S)
 
-pdm = cypdm.PyPDM(jd, fs, nbins, covers)
+pdm = cypdm.CyPDM(jd, fs, nbins, covers)
 myp = 1.0/f1
 myt1 = pdm.getPDM_EquiBinCover(myp)
 myt2 = pdm.getPDM_EquiBin(myp)

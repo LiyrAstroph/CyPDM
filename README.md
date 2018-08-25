@@ -24,21 +24,37 @@ This will generate a library ``cypdm.so``, which can be directly imported in Pyt
 import numpy as np
 import cypdm 
 
-con = np.loadtxt("con_all.txt", usecols=(0, 1))
-t0 = con[0, 0]
-con[:, 0] -= t0
+nd = 1000
+P = 10.0
+jd = np.linspace(0.0, 100.0, nd, dtype=np.double)
+fs = np.sin(jd/P * 2.0*np.pi) + np.random.randn(nd)*0.1
 
-pdm = cypdm.PyPDM(con[:, 0], con[:, 1], 10, 3)
+# create a CyPDM instance with 10 bins and 3 covers
+pdm = cypdm.CyPDM(jd, fs, 10, 3)
+# setup period grid
 myp = 1.0/np.linspace(1.0/50.0/365.0, 1.0e-2, 995, dtype=np.double)
+# get PDM using equidistant bins and covers
 myt1 = pdm.getPDM_EquiBinCover(myp)
+# get PDM using equidistant bins (no covers)
 myt2 = pdm.getPDM_EquiBin(myp)
-```
+# get PDM according to covers, if covers==0, using getPDM_EquiBin(), and if covers!=0, using getPDM_EquiBinCover()
+myt3 = pdm.getPDM(myp)
 
-This loads data from file "con_all.txt" and calculates PDMs.
+
+jd_new = np.linspace(0.0, 100.0, nd, dtype=np.double)
+fs_new = np.sin(jd/P * 2.0*np.pi) + np.random.randn(nd)*0.1
+# set new data 
+pdm.setData(jd_new, fs_new)
+
+# set new bins 10 and covers 5
+pdm.setScan(12, 5)
+```
 
 # Comparison with PyPDM
 
 PyPDM is distributed in PyAstronomy package, which written in pure Python with severe additional overhead.
+
+Running the test code cmp_with_pya.py in the test directory gives the figure shown below.
 
 ![Comparison between CyPDM and PyPDM](https://github.com/liyropt/MyGithubPic/blob/master/cypdm_cmp.jpg)
 

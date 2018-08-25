@@ -48,7 +48,7 @@ cdef extern from "cpdm.h":
     DTYPE_t *periods, DTYPE_t *thetas, unsigned int nper)
 
 
-cdef class PyPDM:
+cdef class CyPDM:
   cdef TypePDM * _thisptr
   cdef DTYPE_t *jd
   cdef DTYPE_t *fs
