@@ -31,6 +31,10 @@ cdef extern from "cpdm.h":
   ctypedef struct TypePDM
 
   TypePDM * cmkPDM(unsigned int nbins, unsigned int covers)
+  
+  void cgetScan(TypePDM * pdm, unsigned int *nbins, unsigned int *covers)
+
+  void csetScan(TypePDM * pdm, unsigned int nbins, unsigned int covers)
 
   void cfreePDM(TypePDM * pdm)
 
@@ -49,8 +53,6 @@ cdef class PyPDM:
   cdef DTYPE_t *jd
   cdef DTYPE_t *fs
   cdef unsigned int n
-  cdef unsigned int nbins
-  cdef unsigned int covers
 
   def __cinit__(self, DTYPE_t [:] jd, DTYPE_t [:] fs, int nbins=10, int covers=3):
 
@@ -61,10 +63,7 @@ cdef class PyPDM:
       msg = "covers=%d incorrect."%covers
       raise ValueError(msg)
 
-    self.nbins = nbins
-    self.covers = covers
     self.n = len(jd)
-
     self.jd = <DTYPE_t *>PyMem_Malloc(self.n * sizeof(DTYPE_t))
     self.fs = <DTYPE_t *>PyMem_Malloc(self.n * sizeof(DTYPE_t))
 
@@ -72,7 +71,7 @@ cdef class PyPDM:
       self.jd[i] = jd[i]
       self.fs[i] = fs[i]   
 
-    self._thisptr = cmkPDM(self.nbins, self.covers)
+    self._thisptr = cmkPDM(nbins, covers)
 
     if self._thisptr == NULL or self.jd == NULL or self.fs == NULL:
       msg = "Fail to create PDM instance."
@@ -103,6 +102,13 @@ cdef class PyPDM:
       self.jd[i] = jd[i]
       self.fs[i] = fs[i]
 
+  cpdef getScan(self):
+    cdef unsigned int nbins
+    cdef unsigned int covers
+    cgetScan(self._thisptr, &nbins, &covers)
+
+    return nbins, covers
+
   cpdef setScan(self, unsigned int nbins, unsigned int covers):
     if nbins <= 0:
       msg = "nbins=%d incorrect."%nbins
@@ -111,8 +117,9 @@ cdef class PyPDM:
       msg = "covers=%d incorrect."%covers
       raise ValueError(msg)
 
-    self.nbins = nbins
-    self.covers = covers
+    csetScan(self._thisptr, nbins, covers)
+
+    return
 
   cpdef getPDM(self, np.ndarray[DTYPE_t, ndim=1] periods):
     thetas = np.empty_like(periods)

@@ -41,6 +41,8 @@ void cpdmEquiBin(TypePDM *pdm, double *datax, double *datay, unsigned int nd, do
 void cpdmEquiBinCover(TypePDM *pdm, double *datax, double *datay, unsigned int nd, double *periods, double *thetas, unsigned int np);
 double cgetTheta(double *phase, double *y, unsigned int n, double *bbeg, double *bend, unsigned int nb);
 void cpdm(TypePDM *pdm, double *datax, double *datay, unsigned int nd, double *periods, double *thetas, unsigned int np);
+void cgetScan(TypePDM *pdm, unsigned int *nbins, unsigned int *covers);
+void csetScan(TypePDM *pdm, unsigned int nbins, unsigned int covers);
 
 TypePDM * cmkPDM(unsigned int mode, unsigned int type);
 void cfreePDM(TypePDM *pdm);

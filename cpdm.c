@@ -310,6 +310,19 @@ void csetUpEquiBlocksCover(unsigned int nbins, unsigned int covers, double *bbeg
   return;
 }
 
+void cgetScan(TypePDM *pdm, unsigned int *nbins, unsigned int *covers)
+{
+  *nbins = pdm->nbins;
+  *covers = pdm->covers;
+  return;
+}
+void csetScan(TypePDM *pdm, unsigned int nbins, unsigned int covers)
+{
+  pdm->nbins = nbins;
+  pdm->covers = covers;
+  return;
+}
+
 /*!
  *  folding phase of a light curve with a given period. 
  */

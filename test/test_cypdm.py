@@ -13,6 +13,8 @@ myp = 1.0/np.linspace(1.0/50.0/365.0, 1.0e-2, 995, dtype=np.double)
 myt1 = pdm.getPDM_EquiBinCover(myp)
 myt2 = pdm.getPDM_EquiBin(myp)
 
+#myt3 = pdm.getPDM(myp)
+
 #plt.plot(myp, myt1)
 #plt.plot(myp, myt2)
 
