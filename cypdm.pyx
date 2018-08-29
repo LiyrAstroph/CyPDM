@@ -30,7 +30,7 @@ ctypedef double DTYPE_t
 cdef extern from "cpdm.h":
   ctypedef struct TypePDM
 
-  TypePDM * cmkPDM(unsigned int nbins, unsigned int covers)
+  TypePDM * cmkPDM(unsigned int nbins, unsigned int covers, unsigned int nd)
   
   void cgetScan(TypePDM * pdm, unsigned int *nbins, unsigned int *covers)
 
@@ -71,7 +71,7 @@ cdef class CyPDM:
       self.jd[i] = jd[i]
       self.fs[i] = fs[i]   
 
-    self._thisptr = cmkPDM(nbins, covers)
+    self._thisptr = cmkPDM(nbins, covers, self.n)
 
     if self._thisptr == NULL or self.jd == NULL or self.fs == NULL:
       msg = "Fail to create PDM instance."

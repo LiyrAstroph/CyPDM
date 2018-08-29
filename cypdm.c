@@ -2777,7 +2777,7 @@ static int __pyx_pf_5cypdm_5CyPDM___cinit__(struct __pyx_obj_5cypdm_CyPDM *__pyx
  *       self.jd[i] = jd[i]
  *       self.fs[i] = fs[i]             # <<<<<<<<<<<<<<
  * 
- *     self._thisptr = cmkPDM(nbins, covers)
+ *     self._thisptr = cmkPDM(nbins, covers, self.n)
  */
     __pyx_t_8 = __pyx_v_i;
     (__pyx_v_self->fs[__pyx_v_i]) = (*((__pyx_t_5cypdm_DTYPE_t *) ( /* dim=0 */ (__pyx_v_fs.data + __pyx_t_8 * __pyx_v_fs.strides[0]) )));
@@ -2786,14 +2786,14 @@ static int __pyx_pf_5cypdm_5CyPDM___cinit__(struct __pyx_obj_5cypdm_CyPDM *__pyx
   /* "cypdm.pyx":74
  *       self.fs[i] = fs[i]
  * 
- *     self._thisptr = cmkPDM(nbins, covers)             # <<<<<<<<<<<<<<
+ *     self._thisptr = cmkPDM(nbins, covers, self.n)             # <<<<<<<<<<<<<<
  * 
  *     if self._thisptr == NULL or self.jd == NULL or self.fs == NULL:
  */
-  __pyx_v_self->_thisptr = cmkPDM(__pyx_v_nbins, __pyx_v_covers);
+  __pyx_v_self->_thisptr = cmkPDM(__pyx_v_nbins, __pyx_v_covers, __pyx_v_self->n);
 
   /* "cypdm.pyx":76
- *     self._thisptr = cmkPDM(nbins, covers)
+ *     self._thisptr = cmkPDM(nbins, covers, self.n)
  * 
  *     if self._thisptr == NULL or self.jd == NULL or self.fs == NULL:             # <<<<<<<<<<<<<<
  *       msg = "Fail to create PDM instance."
@@ -2840,7 +2840,7 @@ static int __pyx_pf_5cypdm_5CyPDM___cinit__(struct __pyx_obj_5cypdm_CyPDM *__pyx
     __PYX_ERR(0, 78, __pyx_L1_error)
 
     /* "cypdm.pyx":76
- *     self._thisptr = cmkPDM(nbins, covers)
+ *     self._thisptr = cmkPDM(nbins, covers, self.n)
  * 
  *     if self._thisptr == NULL or self.jd == NULL or self.fs == NULL:             # <<<<<<<<<<<<<<
  *       msg = "Fail to create PDM instance."
