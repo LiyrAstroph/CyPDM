@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 
   readData(jd, mag, &nd);
 
-  pdm = cmkPDM(nbins, covers);
+  pdm = cmkPDM(nbins, covers, nd);
 
   cpdm(pdm, jd, mag, nd, periods, thetas, np);
 
