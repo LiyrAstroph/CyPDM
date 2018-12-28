@@ -5,7 +5,11 @@
 
 CyPDM
 =================================
-A fast package to apply the phase disperion minimization (PDM) algorithm, based on PyAstronomy module PyPDM (https://github.com/sczesla/PyAstronomy).
+A fast package to apply the phase disperion minimization (PDM) algorithm, based on PyAstronomy module `PyPDM <https://github.com/sczesla/PyAstronomy>`_.
+
+The package is written in C and wrapped with Cython, so that it can be called in both C and Python code.
+
+The PDM alogrithm refers to the reference: `Stellingwerf (1978) <http://adsabs.harvard.edu/abs/1978ApJ...224..953S>`_.
 
 Documentation
 -------------
@@ -38,7 +42,7 @@ Authors & License
 
 Copyright 2018 Yan-Rong Li.
 
-Licensed under the GNU General Public License v3.0 or later (https://opensource.org/licenses/GPL-3.0).
+Licensed under the `GNU General Public License v3.0 or later <https://opensource.org/licenses/GPL-3.0>`_.
 
 Indices and tables
 ------------------
