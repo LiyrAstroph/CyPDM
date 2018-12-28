@@ -1,3 +1,6 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2527266.svg)](https://doi.org/10.5281/zenodo.2527266)
+[![Documentation Status](https://readthedocs.org/projects/cypdm/badge/?version=latest)](https://cypdm.readthedocs.io/en/latest/?badge=latest)
+
 # CyPDM
 
 A fast package to apply the phase disperion minimization (PDM) algorithm, based on PyAstronomy module PyPDM (https://github.com/sczesla/PyAstronomy).
