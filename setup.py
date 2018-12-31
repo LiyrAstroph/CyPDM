@@ -1,9 +1,10 @@
 import os
+import numpy as np
 
 from setuptools import setup
 from setuptools.extension import Extension
 
-include_dirs = []
+include_dirs = [np.get_include()]
 library_dirs = []
 if os.name == 'nt':  # Windows, assumming MSVC compiler
   libraries = []
