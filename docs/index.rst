@@ -18,7 +18,7 @@ Documentation
    :maxdepth: 2
    
    getting_started.rst
-
+   api.rst
 
 Attribution
 -----------
