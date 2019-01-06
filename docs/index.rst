@@ -11,6 +11,9 @@ The package is written in C and wrapped with Cython, so that it can be called in
 
 The PDM alogrithm refers to the reference: `Stellingwerf (1978) <http://adsabs.harvard.edu/abs/1978ApJ...224..953S>`_.
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2528150.svg
+   :target: https://doi.org/10.5281/zenodo.2528150
+   
 Documentation
 -------------
 
@@ -33,14 +36,14 @@ If you make use of this code, please cite it as:
                    minimization algorithm}},
     month        = dec,
     year         = 2018,
-    doi          = {10.5281/zenodo.2527266},
-    url          = {https://doi.org/10.5281/zenodo.2527266}
+    doi          = {10.5281/zenodo.2527265},
+    url          = {https://doi.org/10.5281/zenodo.2527265}
   }
 
 Authors & License
 -----------------
 
-Copyright 2018 Yan-Rong Li.
+Copyright 2019 Yan-Rong Li.
 
 Licensed under the `GNU General Public License v3.0 or later <https://opensource.org/licenses/GPL-3.0>`_.
 

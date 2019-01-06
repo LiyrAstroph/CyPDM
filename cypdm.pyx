@@ -9,6 +9,7 @@ cimport numpy as np
 
 ctypedef double DTYPE_t
 
+__all__ = ["getPDM", "setData", "setScan"]
 
 """
  * CyPDM
@@ -49,9 +50,25 @@ cdef extern from "cpdm.h":
 
 
 cdef class CyPDM:
+  """
+  CyPDM class.
+
+  An instance has data jd and fs of a time series.
+
+  Initialization method looks like::
+
+    CyPDM(jd, fs, nbins=10, covers=3).
+
+  """
+  
   cdef TypePDM * _thisptr
+  
   cdef DTYPE_t *jd
+  """ JD of the time series. """
+
   cdef DTYPE_t *fs
+  """ Fluxes of the time series. """
+
   cdef unsigned int n
 
   def __cinit__(self, DTYPE_t [:] jd, DTYPE_t [:] fs, int nbins=10, int covers=3):
@@ -89,6 +106,19 @@ cdef class CyPDM:
       PyMem_Free(self.fs)
 
   cpdef setData(self, DTYPE_t [:] jd, DTYPE_t [:] fs):
+    """
+    setData(self, jd, fs)
+    Setup the time series 
+
+    Parameters
+    ----------
+    jd : array_like[ndim]
+      JD.
+
+    fs : array_like[ndim]
+      fluxes.
+
+    """
     if len(jd) != self.n:
       print "realloc self.jd and self.fs."
       self.n = len(jd)
@@ -103,6 +133,15 @@ cdef class CyPDM:
       self.fs[i] = fs[i]
 
   cpdef getScan(self):
+    """
+    getScan(self)
+    Get the scan, namely, nbins and covers.
+
+    Parameters
+    ----------
+    
+    """
+
     cdef unsigned int nbins
     cdef unsigned int covers
     cgetScan(self._thisptr, &nbins, &covers)
@@ -110,6 +149,19 @@ cdef class CyPDM:
     return nbins, covers
 
   cpdef setScan(self, unsigned int nbins, unsigned int covers):
+    """
+    setScan(self, nbins, covers)
+    Setup the scan, namely, nbins and covers.
+
+    Parameters
+    ----------
+    nbins : int
+      number of bins.
+
+    covers : int
+      number of covers.
+
+    """
     if nbins <= 0:
       msg = "nbins=%d incorrect."%nbins
       raise ValueError(msg)
@@ -122,18 +174,58 @@ cdef class CyPDM:
     return
 
   cpdef getPDM(self, np.ndarray[DTYPE_t, ndim=1] periods):
+    """
+    getPDM(self, periods)
+    Calculate PDM periodogram at a given period array using equidistant bins or multiple 
+    equidistant bins according to the value of covers.
+
+    Parameters
+    ----------
+    self : handler 
+      handler to this.
+
+    periods : array_like[ndim]
+      the period array on which the PDM periodogram is calculated.
+
+    """
     thetas = np.empty_like(periods)
     cpdm(self._thisptr, self.jd, self.fs, self.n,  \
       <DTYPE_t *>np.PyArray_DATA(periods), <DTYPE_t *>np.PyArray_DATA(thetas), len(periods))
     return thetas
 
   cpdef getPDM_EquiBin(self, np.ndarray[DTYPE_t, ndim=1] periods):
+    """
+    getPDM_EquiBin(self, periods)
+    Calculate PDM periodogram at a given period array with equidistant bins.
+
+    Parameters
+    ----------
+    self : handler
+      handler to this.
+
+    periods: array_like[ndim]
+      the period array on which the PDM periodogram is calculated.
+
+    """
     thetas = np.empty_like(periods)
     cpdmEquiBin(self._thisptr, self.jd, self.fs, self.n, \
       <DTYPE_t *>np.PyArray_DATA(periods), <DTYPE_t *>np.PyArray_DATA(thetas), len(periods))
     return thetas
 
   cpdef getPDM_EquiBinCover(self, np.ndarray[DTYPE_t, ndim=1] periods):
+    """
+    getPDM_EquiBinCover(self, periods)
+    Calculate PDM periodogram at a given period array with multiple sequences of equidistant bins.
+
+    Parameters
+    ----------
+    self : handler
+      handler to this.
+
+    periods: array_like[ndim]
+      the period array on which the PDM periodogram is calculated.
+
+    """
     thetas = np.empty_like(periods)
     cpdmEquiBinCover(self._thisptr, self.jd, self.fs, self.n, \
       <DTYPE_t *>np.PyArray_DATA(periods), <DTYPE_t *>np.PyArray_DATA(thetas), len(periods))
