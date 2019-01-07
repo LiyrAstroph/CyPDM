@@ -14,7 +14,11 @@
 #
 import os
 import sys
+sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../'))
+
+d = os.path.dirname
+sys.path.insert(0, d(d(os.path.abspath(__file__))))
 
 
 # -- Project information -----------------------------------------------------
